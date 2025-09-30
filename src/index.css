@@ -104,6 +104,7 @@
   }
   
   .btn-primary {
+    background-color: rgb(37, 99, 235);
     color: white;
   }
   
@@ -112,13 +113,14 @@
   }
   
   .btn-primary:focus {
-    --tw-ring-color: rgb(59, 130, 246 / 0.5);
+    --tw-ring-color: rgb(59 130 246 / 0.5);
   }
   
   .btn-secondary {
     background-color: rgb(79, 70, 229);
     color: white;
   }
+  
   .btn-secondary:hover {
     background-color: rgb(67, 56, 202);
   }
@@ -156,9 +158,56 @@
     background-color: rgb(55, 65, 81);
     color: white;
     border-color: rgb(75, 85, 99);
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: rgb(59, 130, 246);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+  
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+  }
+  
+  .badge-primary {
+    background-color: rgb(219, 234, 254);
+    color: rgb(30, 58, 138);
+  }
+  
+  .dark .badge-primary {
+    background-color: rgb(191, 219, 254);
+    color: rgb(30, 58, 138);
+  }
+  
+  .badge-secondary {
+    background-color: rgb(224, 231, 255);
+    color: rgb(30, 27, 75);
+  }
+  
+  .dark .badge-secondary {
+    background-color: rgb(199, 210, 254);
+    color: rgb(30, 27, 75);
+  }
+  
+  .badge-accent {
+    background-color: rgb(233, 213, 255);
+    color: rgb(49, 46, 129);
+  }
+  
+  .dark .badge-accent {
+    background-color: rgb(221, 214, 254);
+    color: rgb(49, 46, 129);
+  }
 }
 
-/* For the color picker popover */
+/* Color picker styles */
 .color-picker-popover {
   position: absolute;
   z-index: 10;
@@ -176,27 +225,22 @@
   border-color: #374151;
 }
 
-/* For the color input field */
 .color-input {
   width: 100%;
   height: 2.5rem;
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
   cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: none;
+  padding: 0;
 }
 
 .dark .color-input {
   border-color: #4b5563;
   background-color: #1f2937;
-}
-
-.color-input {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background: none;
-  border: none;
-  padding: 0;
 }
 
 .color-input::-webkit-color-swatch {
@@ -218,6 +262,8 @@
 .dark .color-input::-moz-color-swatch {
   border-color: #4b5563;
 }
+
+/* Focus styles */
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
