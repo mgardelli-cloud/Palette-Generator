@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
-type ButtonProps = Omit<HTMLMotionProps<'button'>, 'ref'> & {
+type ButtonProps = Omit<HTMLMotionProps<'button'>, 'ref' | 'children'> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
@@ -15,6 +15,7 @@ type ButtonProps = Omit<HTMLMotionProps<'button'>, 'ref'> & {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   className?: string;
+  children?: React.ReactNode;
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(({

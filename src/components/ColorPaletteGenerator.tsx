@@ -1,7 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/Button';
+import { 
+  getContrastText, 
+  generateAnalogous, 
+  generateTriadic, 
+  generateMonochromatic
+} from '../utils/colorUtils';
 import { 
   SunIcon, 
   MoonIcon, 
@@ -12,7 +18,6 @@ import {
   CheckIcon 
 } from '@heroicons/react/24/outline';
 import ColorCard from './ColorCard';
-import { getRandomColor, getContrastText } from '../utils/colorUtils';
 import type { ColorPalette } from '../types';
 
 const ColorPaletteGenerator: React.FC = () => {
@@ -36,7 +41,8 @@ const ColorPaletteGenerator: React.FC = () => {
     text: '#111827'
   });
   
-  const [animationKey, setAnimationKey] = useState(0);
+  // Animation key is used to force re-render
+  const [, setAnimationKey] = useState(0);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'current' | 'saved'>('current');
   const [paletteName, setPaletteName] = useState(currentPalette.name);
@@ -55,27 +61,6 @@ const ColorPaletteGenerator: React.FC = () => {
     });
   };
 
-  const generateRandomPalette = () => {
-    const baseColor = getRandomColor();
-    const newColors = [
-      baseColor,
-      getContrastText(baseColor),
-      getRandomColor(),
-      getRandomColor(),
-      getRandomColor(),
-    ];
-    
-    setCurrentPalette({
-      ...currentPalette,
-      colors: newColors,
-      primary: baseColor,
-      secondary: newColors[1],
-      accent: newColors[2],
-      background: getContrastText(baseColor) === '#ffffff' ? '#111827' : '#f9fafb',
-      text: getContrastText(baseColor),
-    });
-    setAnimationKey(prev => prev + 1);
-  };
 
   const handleSavePalette = () => {
     savePalette({
@@ -87,21 +72,11 @@ const ColorPaletteGenerator: React.FC = () => {
     setIsEditingName(false);
   };
 
-  const handleGenerateNew = useCallback(() => {
+  const handleGenerateNew = () => {
     setAnimationKey(prev => prev + 1);
     generateNewPalette();
-  }, [generateNewPalette]);
+  };
 
-  const renderColorCards = useCallback((colors: string[]) => {
-    return colors.map((color: string, index: number) => (
-      <ColorCard 
-        key={`${color}-${index}`} 
-        color={color} 
-        name={color.toUpperCase()} 
-        onClick={() => handleColorSelect(color)} 
-      />
-    ));
-  }, [handleColorSelect]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
@@ -268,7 +243,7 @@ const ColorPaletteGenerator: React.FC = () => {
                     <div>
                       <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Analogous</h4>
                       <div className="grid grid-cols-5 gap-2">
-                        {colorUtils.generateAnalogous(currentPalette.primary).map((color, i) => (
+                        {generateAnalogous(currentPalette.primary).map((color: string, i: number) => (
                           <div 
                             key={`analogous-${i}`}
                             className="aspect-square rounded-md"
@@ -282,7 +257,7 @@ const ColorPaletteGenerator: React.FC = () => {
                     <div>
                       <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Triadic</h4>
                       <div className="grid grid-cols-3 gap-2">
-                        {colorUtils.generateTriadic(currentPalette.primary).map((color, i) => (
+                        {generateTriadic(currentPalette.primary).map((color: string, i: number) => (
                           <div 
                             key={`triadic-${i}`}
                             className="aspect-square rounded-md"
@@ -296,7 +271,7 @@ const ColorPaletteGenerator: React.FC = () => {
                     <div>
                       <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Monochromatic</h4>
                       <div className="grid grid-cols-5 gap-2">
-                        {colorUtils.generateMonochromatic(currentPalette.primary).map((color, i) => (
+                        {generateMonochromatic(currentPalette.primary).map((color: string, i: number) => (
                           <div 
                             key={`mono-${i}`}
                             className="aspect-square rounded-md"
