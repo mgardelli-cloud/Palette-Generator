@@ -77,10 +77,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deletePalette = (paletteName: string) => {
-    setPalettes(prev => prev.filter(p => p.name !== paletteName));
-    if (currentPalette.name === paletteName) {
-      setCurrentPalette(palettes[1] || defaultPalette);
-    }
+    setPalettes(prev => {
+      const newPalettes = prev.filter(p => p.name !== paletteName);
+      // Se abbiamo eliminato la palette corrente, passa alla successiva disponibile
+      if (currentPalette.name === paletteName && newPalettes.length > 0) {
+        setCurrentPalette(newPalettes[0]);
+      } else if (newPalettes.length === 0) {
+        // Se non ci sono più palette, usa quella di default
+        setCurrentPalette(defaultPalette);
+      }
+      return newPalettes;
+    });
   };
 
   const updateCurrentPalette = (palette: ColorPalette) => {

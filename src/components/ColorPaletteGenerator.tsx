@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/Button';
@@ -61,13 +61,6 @@ const ColorPaletteGenerator: React.FC = () => {
   const [reflectiveness, setReflectiveness] = useState(50);
   const [opacity, setOpacity] = useState(100);
   const [generatedPalette, setGeneratedPalette] = useState<Color[]>([]);
-
-  // Animation key is used to force re-render
-  const [, setAnimationKey] = useState(0);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'current' | 'saved'>('current');
-  const [paletteName, setPaletteName] = useState(currentPalette.name);
-  const [isEditingName, setIsEditingName] = useState(false);
 
   useEffect(() => {
     setPaletteName(currentPalette.name);
@@ -228,7 +221,7 @@ const ColorPaletteGenerator: React.FC = () => {
     }
   }, [baseColor, schemeType]);
 
-  const handleColorSelect = (color: string) => {
+  const handleColorSelect = useCallback((color: string) => {
     setCurrentPalette({
       ...currentPalette,
       primary: color,
@@ -236,9 +229,14 @@ const ColorPaletteGenerator: React.FC = () => {
       text: getContrastText(color),
     });
     setBaseColor(color);
-  };
+  }, [currentPalette]);
 
-  const handleSavePalette = () => {
+  const handleSavePalette = useCallback(() => {
+    if (currentPalette.colors.length === 0) {
+      alert('Nessuna palette da salvare. Genera prima una palette.');
+      return;
+    }
+
     savePalette({
       ...currentPalette,
       name: paletteName.trim() || 'Unnamed Palette',
@@ -246,7 +244,7 @@ const ColorPaletteGenerator: React.FC = () => {
     setShowSaveSuccess(true);
     setTimeout(() => setShowSaveSuccess(false), 2000);
     setIsEditingName(false);
-  };
+  }, [currentPalette, paletteName, savePalette]);
 
   const handleExportPalette = () => {
     const paletteData = {
@@ -271,41 +269,79 @@ const ColorPaletteGenerator: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleGenerateNew = () => {
-    setAnimationKey(prev => prev + 1);
+  const handleGenerateNew = useCallback(() => {
+    // Genera una nuova palette usando il context
     generateNewPalette();
     // Genera anche un nuovo colore base casuale
     const newBaseColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
     setBaseColor(newBaseColor);
-  };
+  }, [generateNewPalette]);
 
-  const handleImportPalette = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportPalette = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Reset del valore dell'input per permettere di importare lo stesso file più volte
+    event.target.value = '';
 
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const importedData = JSON.parse(e.target?.result as string);
-        if (importedData.colors && Array.isArray(importedData.colors)) {
-          setCurrentPalette({
-            name: importedData.name || 'Imported Palette',
-            colors: importedData.colors,
-            primary: importedData.primary || importedData.colors[0],
-            secondary: importedData.secondary || importedData.colors[1] || importedData.colors[0],
-            accent: importedData.accent || importedData.colors[2] || importedData.colors[1] || importedData.colors[0],
-            background: importedData.background || '#ffffff',
-            text: importedData.text || '#000000',
-          });
-          setBaseColor(importedData.colors[0]);
+        const result = e.target?.result;
+        if (!result || typeof result !== 'string') {
+          throw new Error('Errore nella lettura del file');
         }
+
+        const importedData = JSON.parse(result);
+
+        // Validazione più robusta dei dati importati
+        if (!importedData || typeof importedData !== 'object') {
+          throw new Error('Il file non contiene dati validi');
+        }
+
+        if (!importedData.colors || !Array.isArray(importedData.colors) || importedData.colors.length === 0) {
+          throw new Error('Il file non contiene colori validi');
+        }
+
+        // Validazione che tutti gli elementi siano stringhe hex valide
+        const validColors = importedData.colors.filter((color: any) =>
+          typeof color === 'string' && /^#([0-9A-F]{3}){1,2}$/i.test(color)
+        );
+
+        if (validColors.length === 0) {
+          throw new Error('Nessun colore valido trovato nel file');
+        }
+
+        // Crea la palette importata
+        const importedPalette: ColorPalette = {
+          name: importedData.name || 'Imported Palette',
+          colors: validColors,
+          primary: importedData.primary || validColors[0],
+          secondary: importedData.secondary || validColors[1] || validColors[0],
+          accent: importedData.accent || validColors[2] || validColors[1] || validColors[0],
+          background: importedData.background || '#ffffff',
+          text: importedData.text || '#000000',
+        };
+
+        setCurrentPalette(importedPalette);
+        setBaseColor(validColors[0]);
+
+        // Mostra messaggio di successo
+        alert(`Palette "${importedPalette.name}" importata con successo! (${validColors.length} colori)`);
+
       } catch (error) {
         console.error('Errore durante l\'importazione del file:', error);
-        alert('Errore durante l\'importazione del file. Assicurati che sia un file JSON valido.');
+        const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
+        alert(`Errore durante l'importazione: ${errorMessage}\n\nAssicurati che il file sia un JSON valido con colori esadecimali.`);
       }
     };
+
+    reader.onerror = () => {
+      alert('Errore nella lettura del file. Riprova.');
+    };
+
     reader.readAsText(file);
-  };
+  }, []);
 
   // Lista degli schemi disponibili
   const schemeList: ColorSchemeType[] = [
