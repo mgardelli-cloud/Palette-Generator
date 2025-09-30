@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/Button';
@@ -62,9 +62,11 @@ const ColorPaletteGenerator: React.FC = () => {
   const [opacity, setOpacity] = useState(100);
   const [generatedPalette, setGeneratedPalette] = useState<Color[]>([]);
 
-  useEffect(() => {
-    setPaletteName(currentPalette.name);
-  }, [currentPalette]);
+  // Animation key is used to force re-render
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<'current' | 'saved'>('current');
+  const [paletteName, setPaletteName] = useState(currentPalette.name);
+  const [isEditingName, setIsEditingName] = useState(false);
 
   // Funzione avanzata per generare palette di colori
   const generateAdvancedPalette = (baseHex: string, scheme: ColorSchemeType): Color[] => {
@@ -343,28 +345,15 @@ const ColorPaletteGenerator: React.FC = () => {
     reader.readAsText(file);
   }, []);
 
-  // Lista degli schemi disponibili
-  const schemeList: ColorSchemeType[] = [
-    'LuminosityContrast',
-    'MonochromaticAchromatic',
-    'Monochromatic',
-    'Analogous',
-    'Triadic',
-    'Complementary',
-    'SplitComplementary',
-    'Tetradic'
-  ];
-
-  const schemeLabels: Record<ColorSchemeType, string> = {
-    'LuminosityContrast': 'Contrasto L',
-    'MonochromaticAchromatic': 'Accento/Neutro',
-    'Monochromatic': 'Mono',
-    'Analogous': 'Analogo',
-    'Triadic': 'Triadico',
-    'Complementary': 'Comp.',
-    'SplitComplementary': 'Split Comp.',
-    'Tetradic': 'Tetradico',
-  };
+// Memoizza le funzioni di generazione per evitare ricreazioni inutili
+const schemeFunctions = useMemo(() => ({
+  generateAnalogous,
+  generateTriadic,
+  generateMonochromatic,
+  generateComplementary,
+  generateSplitComplementary,
+  generateTetradic,
+}), []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
