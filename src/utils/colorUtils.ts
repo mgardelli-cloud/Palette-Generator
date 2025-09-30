@@ -38,12 +38,12 @@ export const getContrastText = (hexColor: string): string => {
 export const generateAnalogous = (baseColor: string): string[] => {
   const baseHsl = hexToHsl(baseColor);
   const colors: string[] = [];
-  
+
   for (let i = -2; i <= 2; i++) {
     const hue = (baseHsl.h + i * 30 + 360) % 360;
     colors.push(hslToHex(hue, baseHsl.s, baseHsl.l));
   }
-  
+
   return colors;
 };
 
@@ -65,6 +65,16 @@ export const generateTriadic = (baseColor: string): string[] => {
   ];
 };
 
+export const generateSplitComplementary = (baseColor: string): string[] => {
+  const baseHsl = hexToHsl(baseColor);
+  const complementaryHue = (baseHsl.h + 180) % 360;
+  return [
+    baseColor,
+    hslToHex((complementaryHue + 30) % 360, baseHsl.s, baseHsl.l),
+    hslToHex((complementaryHue - 30 + 360) % 360, baseHsl.s, baseHsl.l)
+  ];
+};
+
 export const generateTetradic = (baseColor: string): string[] => {
   const baseHsl = hexToHsl(baseColor);
   return [
@@ -78,20 +88,35 @@ export const generateTetradic = (baseColor: string): string[] => {
 export const generateMonochromatic = (baseColor: string): string[] => {
   const baseHsl = hexToHsl(baseColor);
   const colors: string[] = [];
-  
+
   for (let i = 0; i < 5; i++) {
     const lightness = 10 + (i * 20);
     colors.push(hslToHex(baseHsl.h, baseHsl.s, lightness));
   }
-  
+
   return colors;
+};
+
+export const generateMonochromaticAchromatic = (baseColor: string): string[] => {
+  return [
+    baseColor,
+    '#FFFFFF',
+    '#E5E7EB',
+    '#4B5563',
+    '#000000',
+  ];
+};
+
+export const generateLuminosityContrast = (baseColor: string, lightness: number): string => {
+  const baseHsl = hexToHsl(baseColor);
+  return hslToHex(baseHsl.h, baseHsl.s, lightness);
 };
 
 // Helper: Convert hex to HSL
 export const hexToHsl = (hex: string): { h: number; s: number; l: number } => {
   let { r, g, b } = hexToRgb(hex);
   r /= 255, g /= 255, b /= 255;
-  
+
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
   let h = 0, s, l = (max + min) / 2;
 
@@ -100,13 +125,13 @@ export const hexToHsl = (hex: string): { h: number; s: number; l: number } => {
   } else {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    
+
     switch (max) {
       case r: h = (g - b) / d + (g < b ? 6 : 0); break;
       case g: h = (b - r) / d + 2; break;
       case b: h = (r - g) / d + 4; break;
     }
-    
+
     h /= 6;
   }
 
@@ -117,12 +142,12 @@ export const hexToHsl = (hex: string): { h: number; s: number; l: number } => {
 export const hslToHex = (h: number, s: number, l: number): string => {
   s /= 100;
   l /= 100;
-  
+
   let c = (1 - Math.abs(2 * l - 1)) * s;
   let x = c * (1 - Math.abs((h / 60) % 2 - 1));
   let m = l - c / 2;
   let r = 0, g = 0, b = 0;
-  
+
   if (0 <= h && h < 60) {
     r = c; g = x; b = 0;
   } else if (60 <= h && h < 120) {
@@ -136,11 +161,11 @@ export const hslToHex = (h: number, s: number, l: number): string => {
   } else if (300 <= h && h < 360) {
     r = c; g = 0; b = x;
   }
-  
+
   r = Math.round((r + m) * 255);
   g = Math.round((g + m) * 255);
   b = Math.round((b + m) * 255);
-  
+
   return rgbToHex(r, g, b);
 };
 
@@ -154,10 +179,10 @@ export const generateRandomPalette = (name: string): ColorPalette => {
     generateTetradic,
     generateMonochromatic
   ];
-  
+
   const scheme = schemes[Math.floor(Math.random() * schemes.length)];
   const colors = scheme(baseColor);
-  
+
   const primaryColor = colors[0];
   return {
     name: name || `Palette ${Math.floor(Math.random() * 1000)}`,
@@ -182,6 +207,9 @@ export default {
   generateTriadic,
   generateTetradic,
   generateMonochromatic,
+  generateSplitComplementary,
+  generateMonochromaticAchromatic,
+  generateLuminosityContrast,
   hexToHsl,
   hslToHex,
   generateRandomPalette

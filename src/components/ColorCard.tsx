@@ -10,6 +10,8 @@ interface ColorCardProps {
   showContrast?: boolean;
   showHex?: boolean;
   onClick?: () => void;
+  reflectiveness?: number;
+  opacity?: number;
 }
 
 const ColorCard: React.FC<ColorCardProps> = ({
@@ -19,6 +21,8 @@ const ColorCard: React.FC<ColorCardProps> = ({
   showContrast = true,
   showHex = true,
   onClick,
+  reflectiveness = 0,
+  opacity = 100,
 }) => {
   const [copied, setCopied] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -34,6 +38,11 @@ const ColorCard: React.FC<ColorCardProps> = ({
     });
   };
 
+  // Calcolo stili materiale
+  const blur = reflectiveness > 0 ? (100 - reflectiveness) / 10 : 0;
+  const opacityShadow = reflectiveness / 200;
+  const shadow = reflectiveness > 0 ? `inset 0 0 ${blur}px rgba(255, 255, 255, ${opacityShadow}), inset 0 0 10px rgba(0, 0, 0, ${opacityShadow / 2})` : 'none';
+
   return (
     <motion.div
       className={cn(
@@ -42,14 +51,30 @@ const ColorCard: React.FC<ColorCardProps> = ({
         'dark:shadow-gray-900/30',
         className
       )}
-      style={{ backgroundColor: color, color: textColor }}
+      style={{
+        backgroundColor: color,
+        color: textColor,
+        opacity: opacity / 100,
+        boxShadow: shadow,
+        backdropFilter: opacity < 100 ? `blur(${(100 - opacity) / 20}px)` : 'none',
+      }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <div className="p-4 h-32 sm:h-40 flex flex-col justify-between">
+      {/* Sfondo per simulare l'ambiente per l'opacità */}
+      {opacity < 100 && (
+        <div className="absolute inset-0 z-0 opacity-20"
+             style={{
+                backgroundImage: 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjEiPjxyZWN0IHdpZHRoPSI5IiBoZWlnaHQ9IjkiLz48cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiLz48L2c+PC9zdmc+")',
+                backgroundSize: '20px 20px'
+             }}
+        ></div>
+      )}
+
+      <div className="p-4 h-32 sm:h-40 flex flex-col justify-between relative z-10">
         <div className="flex justify-between items-start">
           <div>
             {name && (
@@ -63,7 +88,7 @@ const ColorCard: React.FC<ColorCardProps> = ({
               </p>
             )}
           </div>
-          
+
           <button
             onClick={handleCopy}
             className={cn(
@@ -88,7 +113,7 @@ const ColorCard: React.FC<ColorCardProps> = ({
               <span className="font-mono">{contrastScore}:1</span>
             </div>
             <div className="h-1.5 bg-black/10 dark:bg-white/10 rounded-full mt-1 overflow-hidden">
-              <div 
+              <div
                 className="h-full rounded-full"
                 style={{
                   width: `${Math.min(contrastScore * 10, 100)}%`,

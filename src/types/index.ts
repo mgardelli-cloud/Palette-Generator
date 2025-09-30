@@ -6,6 +6,8 @@ export interface ColorPalette {
   accent: string;
   background: string;
   text: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ThemeContextType {
@@ -14,8 +16,9 @@ export interface ThemeContextType {
   currentPalette: ColorPalette;
   generateNewPalette: () => void;
   palettes: ColorPalette[];
-  savePalette: (palette: ColorPalette) => void;
+  savePalette: (palette: Omit<ColorPalette, 'name'> & { name?: string }) => void;
   deletePalette: (paletteName: string) => void;
+  setCurrentPalette: (palette: ColorPalette) => void;
 }
 
 export interface ColorUtils {
@@ -28,4 +31,11 @@ export interface ColorUtils {
   rgbToHex: (r: number, g: number, b: number) => string;
   getContrastText: (hexColor: string) => string;
   getLuminance: (hexColor: string) => number;
+  getRandomColor: () => string;
+  generateRandomPalette: (name?: string) => ColorPalette;
 }
+
+// Utility types
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
