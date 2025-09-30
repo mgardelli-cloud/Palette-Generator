@@ -55,15 +55,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setPalettes(prev => [newPalette, ...prev]);
   };
 
-  const savePalette = (palette: ColorPalette) => {
+  const savePalette = (palette: Omit<ColorPalette, 'name'> & { name?: string }) => {
+    const paletteWithName: ColorPalette = {
+      name: palette.name || `Palette ${Date.now()}`,
+      colors: palette.colors,
+      primary: palette.primary,
+      secondary: palette.secondary,
+      accent: palette.accent,
+      background: palette.background,
+      text: palette.text,
+    };
+
     setPalettes(prev => {
-      const exists = prev.some(p => p.name === palette.name);
+      const exists = prev.some(p => p.name === paletteWithName.name);
       if (exists) {
-        return prev.map(p => p.name === palette.name ? palette : p);
+        return prev.map(p => p.name === paletteWithName.name ? paletteWithName : p);
       }
-      return [palette, ...prev];
+      return [paletteWithName, ...prev];
     });
-    setCurrentPalette(palette);
+    setCurrentPalette(paletteWithName);
   };
 
   const deletePalette = (paletteName: string) => {
@@ -71,6 +81,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (currentPalette.name === paletteName) {
       setCurrentPalette(palettes[1] || defaultPalette);
     }
+  };
+
+  const updateCurrentPalette = (palette: ColorPalette) => {
+    setCurrentPalette(palette);
   };
 
   // Apply the current palette to the document
@@ -95,6 +109,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         palettes,
         savePalette,
         deletePalette,
+        setCurrentPalette: updateCurrentPalette,
       }}
     >
       {children}

@@ -16,7 +16,7 @@ interface ThemeState {
 
 export const useThemeStore = create<ThemeState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       darkMode: false,
       currentPalette: {
         name: 'Default',

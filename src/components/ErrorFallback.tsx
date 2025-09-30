@@ -1,6 +1,6 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 import { AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "./ui/Button"
 
 interface ErrorFallbackProps {
   error: Error
