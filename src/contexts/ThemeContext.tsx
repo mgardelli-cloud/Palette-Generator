@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import type { ColorPalette, ThemeContextType } from '../types';
 import colorUtils from '../utils/colorUtils';
 
@@ -16,14 +16,46 @@ const defaultPalette: ColorPalette = {
   text: '#111827',
 };
 
+// Available color schemes
+const schemeList = [
+  'LuminosityContrast',
+  'MonochromaticAchromatic',
+  'Monochromatic',
+  'Analogous',
+  'Complementary',
+  'Triadic',
+  'SplitComplementary',
+  'Tetradic'
+] as const;
+
+// Color scheme labels
+const schemeLabels: Record<string, string> = {
+  LuminosityContrast: 'Luminosità',
+  MonochromaticAchromatic: 'Mono Acromatico',
+  Monochromatic: 'Monocromatico',
+  Analogous: 'Analogo',
+  Complementary: 'Complementare',
+  Triadic: 'Triadico',
+  SplitComplementary: 'Split Comp.',
+  Tetradic: 'Tetradico'
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('darkMode');
-      return saved ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const savedTheme = localStorage.getItem('darkMode');
+      return savedTheme ? JSON.parse(savedTheme) : window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
     return false;
   });
+  
+  const [colorScheme, setColorScheme] = useState<string>('Analogous');
+  
+  // Save dark mode preference to localStorage and update document class
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
 
   const [palettes, setPalettes] = useState<ColorPalette[]>(() => {
     if (typeof window !== 'undefined') {
@@ -35,30 +67,26 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [currentPalette, setCurrentPalette] = useState<ColorPalette>(defaultPalette);
 
-  // Save to localStorage when darkMode or palettes change
-  useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(darkMode));
-    document.documentElement.classList.toggle('dark', darkMode);
-  }, [darkMode]);
-
+  // Save palettes to localStorage when they change
   useEffect(() => {
     localStorage.setItem(PALETTE_STORAGE_KEY, JSON.stringify(palettes));
   }, [palettes]);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
+  const toggleDarkMode = useCallback(() => {
+    setDarkMode(prev => !prev);
+  }, []);
 
-  const generateNewPalette = () => {
+  const generateNewPalette = useCallback((): ColorPalette => {
     const newPalette = colorUtils.generateRandomPalette(`Palette ${palettes.length + 1}`);
     setCurrentPalette(newPalette);
     setPalettes(prev => [newPalette, ...prev]);
-  };
+    return newPalette;
+  }, [palettes.length]);
 
-  const savePalette = (palette: Omit<ColorPalette, 'name'> & { name?: string }) => {
+  const savePalette = useCallback((palette: Omit<ColorPalette, 'name'> & { name?: string }) => {
     const paletteWithName: ColorPalette = {
       name: palette.name || `Palette ${Date.now()}`,
-      colors: palette.colors,
+      colors: [...palette.colors],
       primary: palette.primary,
       secondary: palette.secondary,
       accent: palette.accent,
@@ -74,25 +102,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return [paletteWithName, ...prev];
     });
     setCurrentPalette(paletteWithName);
-  };
+  }, []);
 
-  const deletePalette = (paletteName: string) => {
+  const deletePalette = useCallback((paletteName: string) => {
     setPalettes(prev => {
       const newPalettes = prev.filter(p => p.name !== paletteName);
-      // Se abbiamo eliminato la palette corrente, passa alla successiva disponibile
-      if (currentPalette.name === paletteName && newPalettes.length > 0) {
-        setCurrentPalette(newPalettes[0]);
-      } else if (newPalettes.length === 0) {
-        // Se non ci sono più palette, usa quella di default
-        setCurrentPalette(defaultPalette);
+      // If we deleted the current palette, switch to the next available one
+      if (currentPalette.name === paletteName) {
+        setCurrentPalette(newPalettes[0] || defaultPalette);
       }
       return newPalettes;
     });
-  };
+  }, [currentPalette.name]);
 
-  const updateCurrentPalette = (palette: ColorPalette) => {
+  const updateCurrentPalette = useCallback((palette: ColorPalette) => {
     setCurrentPalette(palette);
-  };
+  }, []);
 
   // Apply the current palette to the document
   useEffect(() => {
@@ -106,19 +131,35 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [currentPalette]);
 
+  // Create the context value
+  const contextValue = useMemo(() => ({
+    darkMode,
+    toggleDarkMode,
+    currentPalette,
+    generateNewPalette,
+    palettes,
+    savePalette,
+    deletePalette,
+    setCurrentPalette: updateCurrentPalette,
+    colorScheme,
+    setColorScheme,
+    schemeList,
+    schemeLabels
+  }), [
+    darkMode,
+    toggleDarkMode,
+    currentPalette,
+    generateNewPalette,
+    palettes,
+    savePalette,
+    deletePalette,
+    updateCurrentPalette,
+    colorScheme,
+    setColorScheme
+  ]);
+
   return (
-    <ThemeContext.Provider
-      value={{
-        darkMode,
-        toggleDarkMode,
-        currentPalette,
-        generateNewPalette,
-        palettes,
-        savePalette,
-        deletePalette,
-        setCurrentPalette: updateCurrentPalette,
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

@@ -19,6 +19,10 @@ export interface ThemeContextType {
   savePalette: (palette: Omit<ColorPalette, 'name'> & { name?: string }) => void;
   deletePalette: (paletteName: string) => void;
   setCurrentPalette: (palette: ColorPalette) => void;
+  colorScheme: string;
+  setColorScheme: (scheme: string) => void;
+  schemeList: readonly string[];
+  schemeLabels: Record<string, string>;
 }
 
 export interface ColorUtils {
