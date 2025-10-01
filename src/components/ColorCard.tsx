@@ -84,20 +84,22 @@ const ColorCard: React.FC<ColorCardProps> = ({
       <div className="p-4 flex flex-col h-full relative z-10">
         <div className="flex justify-between items-start mb-2">
           <div className="space-y-1">
-            {name && (
-              <h3 className="font-semibold text-sm sm:text-base break-words max-w-[80%]">
-                {name}
-              </h3>
-            )}
-            <div className="space-y-0.5">
-              {showHex && (
-                <p className="text-xs sm:text-sm opacity-90 font-mono">
-                  {color.toUpperCase()}
-                </p>
+            <div className="min-w-0">
+              {name && (
+                <h3 className="font-semibold text-sm sm:text-base truncate max-w-[180px] sm:max-w-[220px]" title={name}>
+                  {name}
+                </h3>
               )}
-              <p className="text-xs sm:text-sm opacity-90 font-mono">
-                {rgbString}
-              </p>
+              <div className="space-y-0.5">
+                {showHex && (
+                  <p className="text-xs sm:text-sm opacity-90 font-mono truncate" title={color.toUpperCase()}>
+                    {color.toUpperCase()}
+                  </p>
+                )}
+                <p className="text-xs sm:text-sm opacity-90 font-mono truncate" title={rgbString}>
+                  {rgbString}
+                </p>
+              </div>
             </div>
           </div>
 
