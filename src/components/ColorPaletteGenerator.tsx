@@ -603,8 +603,9 @@ return (
 
             <Button
               onClick={handleGenerateNew}
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-1.5 text-gray-900 dark:text-white"
               aria-label="Genera nuova palette casuale"
+              variant="primary"
             >
               <ArrowPathIcon className="h-4 w-4" />
               Generate New
@@ -613,7 +614,7 @@ return (
             <Button
               variant="outline"
               onClick={handleExportPalette}
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-1.5 text-gray-900 dark:text-white"
               aria-label="Esporta palette corrente come file JSON"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
