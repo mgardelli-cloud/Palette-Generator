@@ -134,17 +134,20 @@ const ColorCard: React.FC<ColorCardProps> = ({
 
         <div className="mt-auto pt-3">
           {contrastScore !== null && (
-            <div className="text-xs opacity-80">
-              <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+            <div className="text-xs" style={{ color: textColor, opacity: 0.9 }}>
+              <div 
+                className="h-1.5 w-full rounded-full overflow-hidden" 
+                style={{ backgroundColor: textColor === '#000000' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)' }}
+              >
                 <div 
-                  className="h-full bg-current"
+                  className="h-full"
                   style={{ 
                     width: `${Math.min(100, contrastScore * 10)}%`,
                     backgroundColor: textColor 
                   }}
                 />
               </div>
-              <div className="mt-1 flex justify-between">
+              <div className="mt-1 flex justify-between" style={{ color: textColor }}>
                 <span>Contrast</span>
                 <span className="font-mono">{contrastScore}:1</span>
               </div>
