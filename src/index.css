@@ -1,8 +1,8 @@
-﻿@import 'tailwindcss/base';
+@import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-@layer base {
+
   :root {
     --color-primary: 59, 130, 246;    /* blue-500 */
     --color-secondary: 99, 102, 241;  /* indigo-500 */
@@ -275,4 +275,3 @@ a:hover {
 
 button {
   background-color: #f9f9f9;
-}
