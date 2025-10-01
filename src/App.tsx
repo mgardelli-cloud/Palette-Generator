@@ -16,7 +16,13 @@ function App() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <ColorPaletteGenerator />
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-64">
+                  <LoadingSpinner size="lg" />
+                </div>
+              }>
+                <ColorPaletteGenerator />
+              </Suspense>
             </motion.div>
           </main>
           
