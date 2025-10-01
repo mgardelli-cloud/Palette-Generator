@@ -35,6 +35,7 @@ module.exports = {
     },
   },
   plugins: [
-    require('tailwind-scrollbar'),
+    // Temporaneamente rimosso per risolvere l'errore di build
+    // require('tailwind-scrollbar'),
   ],
 };
