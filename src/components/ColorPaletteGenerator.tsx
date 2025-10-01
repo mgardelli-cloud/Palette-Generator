@@ -612,9 +612,9 @@ return (
             </Button>
 
             <Button
-              variant="outline"
+              variant="primary"
               onClick={handleExportPalette}
-              className="flex items-center gap-1.5 text-gray-900 dark:text-white"
+              className="flex items-center gap-1.5"
               aria-label="Esporta palette corrente come file JSON"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
