@@ -622,7 +622,7 @@ return (
             </Button>
 
             <Button
-              variant="primary"
+              variant="outline"
               className="flex items-center gap-1.5"
               onClick={() => document.getElementById('import-palette')?.click()}
               aria-label="Importa palette da file JSON"
