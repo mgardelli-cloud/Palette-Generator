@@ -1,6 +1,9 @@
 import { ThemeProvider } from './contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import ColorPaletteGenerator from './components/ColorPaletteGenerator';
+import { lazy, Suspense } from 'react';
+import { LoadingSpinner } from './components/ui/loading-spinner';
+
+const ColorPaletteGenerator = lazy(() => import('./components/ColorPaletteGenerator'));
 
 function App() {
   return (
