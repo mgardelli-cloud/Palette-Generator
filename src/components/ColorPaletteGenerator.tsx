@@ -592,7 +592,7 @@ return (
 
           <div className="flex flex-wrap gap-2">
             <Button
-              variant="outline"
+              variant="primary"
               onClick={() => setActiveTab(activeTab === 'current' ? 'saved' : 'current')}
               className="flex items-center gap-1.5"
               aria-label={`Passa a ${activeTab === 'current' ? 'palette salvate' : 'palette corrente'}`}
