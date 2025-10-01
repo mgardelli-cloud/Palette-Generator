@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/Button';
@@ -27,6 +27,29 @@ import type { ColorPalette } from '../types';
 
 // Definizione dei tipi di schema colore
 type ColorSchemeType = 'Analogous' | 'Complementary' | 'Triadic' | 'Monochromatic' | 'SplitComplementary' | 'Tetradic' | 'MonochromaticAchromatic' | 'LuminosityContrast';
+
+// Definizioni per la UI degli schemi colore
+const schemeList: ColorSchemeType[] = [
+  'LuminosityContrast',
+  'MonochromaticAchromatic',
+  'Monochromatic',
+  'Analogous',
+  'Complementary',
+  'Triadic',
+  'SplitComplementary',
+  'Tetradic'
+];
+
+const schemeLabels: Record<ColorSchemeType, string> = {
+  LuminosityContrast: 'Luminosità',
+  MonochromaticAchromatic: 'Mono Acromatico',
+  Monochromatic: 'Monocromatico',
+  Analogous: 'Analogo',
+  Complementary: 'Complementare',
+  Triadic: 'Triadico',
+  SplitComplementary: 'Split Comp.',
+  Tetradic: 'Tetradico'
+};
 
 interface Color {
   hex: string;
@@ -345,17 +368,7 @@ const ColorPaletteGenerator: React.FC = () => {
     reader.readAsText(file);
   }, []);
 
-// Memoizza le funzioni di generazione per evitare ricreazioni inutili
-const schemeFunctions = useMemo(() => ({
-  generateAnalogous,
-  generateTriadic,
-  generateMonochromatic,
-  generateComplementary,
-  generateSplitComplementary,
-  generateTetradic,
-}), []);
-
-  return (
+return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm">

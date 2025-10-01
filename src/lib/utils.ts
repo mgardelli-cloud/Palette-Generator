@@ -50,23 +50,6 @@ export function getRandomColor(): string {
 }
 
 /**
- * Controlla se un colore è considerato chiaro
- * @param color - Colore in formato esadecimale (con o senza #)
- * @returns boolean - true se il colore è chiaro, false altrimenti
- */
-export function isLightColor(color: string): boolean {
-  const hex = color.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  
-  // Formula per la luminosità percepita (WCAG)
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  
-  return brightness > 128;
-}
-
-/**
  * Formatta un colore esadecimale nel formato corretto
  * @example formatHex('abc') => '#AABBCC'
  */
@@ -90,10 +73,10 @@ export function getTextColor(backgroundColor: string): string {
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  
+
   // Formula di luminanza WCAG
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  
+
   return luminance > 0.5 ? '#000000' : '#FFFFFF';
 }
 
@@ -130,33 +113,29 @@ export function debounce<T extends (...args: any[]) => any>(
  * Calcola il rapporto di contrasto tra due colori (WCAG 2.0)
  * @returns Un numero compreso tra 1 (stesso colore) e 21 (massimo contrasto)
  */
-/**
- * Calcola il rapporto di contrasto tra due colori (WCAG 2.0)
- * @returns Un numero compreso tra 1 (stesso colore) e 21 (massimo contrasto)
- */
 export function getContrastRatio(color1: string, color2: string): number {
   const getLuminance = (hex: string): number => {
     // Rimuovi il carattere # se presente
     const hexColor = hex.startsWith('#') ? hex.substring(1) : hex;
-    
+
     // Converti in RGB
     const r = parseInt(hexColor.substring(0, 2), 16) / 255;
     const g = parseInt(hexColor.substring(2, 4), 16) / 255;
     const b = parseInt(hexColor.substring(4, 6), 16) / 255;
-    
+
     // Applica la correzione gamma
-    const sRGB = [r, g, b].map(c => 
+    const sRGB = [r, g, b].map(c =>
       c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
     );
-    
+
     // Calcola la luminanza relativa (formula WCAG 2.0)
     return 0.2126 * sRGB[0] + 0.7152 * sRGB[1] + 0.0722 * sRGB[2];
   };
-  
+
   // Aggiungi un piccolo valore per evitare divisioni per zero
   const l1 = getLuminance(color1) + 0.05;
   const l2 = getLuminance(color2) + 0.05;
-  
+
   // Restituisci il rapporto di contrasto (sempre >= 1)
   return l1 > l2 ? l1 / l2 : l2 / l1;
 }
