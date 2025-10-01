@@ -46,9 +46,23 @@ const ColorCard: React.FC<ColorCardProps> = ({
     ? `inset 0 0 ${blur}px rgba(255, 255, 255, ${opacityShadow}), inset 0 0 10px rgba(0, 0, 0, ${opacityShadow / 2})` 
     : 'none';
 
-  // Determina il colore del testo in base al contrasto
+  // Funzione per determinare se un colore è chiaro
+  const isLightColor = (hexColor: string) => {
+    // Converti il colore esadecimale in RGB
+    const r = parseInt(hexColor.substr(1, 2), 16);
+    const g = parseInt(hexColor.substr(3, 2), 16);
+    const b = parseInt(hexColor.substr(5, 2), 16);
+    
+    // Calcola la luminosità percepita (formula di luminosità relativa)
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    // Se la luminosità è maggiore di 128, il colore è chiaro
+    return brightness > 155; // Aumentato leggermente la soglia per una migliore leggibilità
+  };
+
+  // Determina il colore del testo in base alla luminosità del colore di sfondo
   const textStyle = {
-    color: textColor === 'black' ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)'
+    color: isLightColor(color) ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)'
   };
 
   return (
