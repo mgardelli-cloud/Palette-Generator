@@ -40,10 +40,10 @@ const ColorCard: React.FC<ColorCardProps> = ({
   };
 
   // Material style calculation
-  const blur = reflectiveness > 0 ? (100 - reflectiveness) / 10 : 0;
-  const opacityShadow = reflectiveness / 200;
+  const blur = reflectiveness > 0 ? (100 - reflectiveness) / 8 : 0; // Ridotto il divisore da 10 a 8 per un effetto più pronunciato
+  const opacityShadow = reflectiveness / 100; // Aumentato l'opacità massima da 0.5 a 1.0
   const shadow = reflectiveness > 0 
-    ? `inset 0 0 ${blur}px rgba(255, 255, 255, ${opacityShadow}), inset 0 0 10px rgba(0, 0, 0, ${opacityShadow / 2})` 
+    ? `inset 0 0 ${blur}px rgba(255, 255, 255, ${opacityShadow * 0.8}), inset 0 0 15px rgba(0, 0, 0, ${opacityShadow * 0.3})` 
     : 'none';
 
   // Funzione per determinare se un colore è chiaro
