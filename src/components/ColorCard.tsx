@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import { cn, getTextColor, getContrastRatio, copyToClipboard, hexToRgb } from '../lib/utils';
+import { cn, getTextColor, getContrastRatio, copyToClipboard } from '../lib/utils';
 
 interface ColorCardProps {
   color: string;
@@ -30,9 +30,6 @@ const ColorCard: React.FC<ColorCardProps> = ({
   const contrastRatio = showContrast ? getContrastRatio(color, textColor) : null;
   const contrastScore = contrastRatio ? Math.round(contrastRatio * 10) / 10 : null;
   
-  // Convert hex to RGB
-  const rgbColor = hexToRgb(color) || { r: 0, g: 0, b: 0 };
-  const rgbString = `RGB: ${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`;
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
