@@ -65,19 +65,54 @@ export function formatHex(hex: string): string {
 }
 
 /**
- * Determina il colore del testo in base allo sfondo per garantire la leggibilità
+ * Determina il colore del testo in base allo sfondo per garantire la massima leggibilità
+ * Utilizza l'algoritmo WCAG 2.0 con soglie ottimizzate per una migliore leggibilità
  * @returns '#000000' per sfondi chiari, '#FFFFFF' per sfondi scuri
  */
 export function getTextColor(backgroundColor: string): string {
+  // Gestisci il caso in cui il colore sia in formato rgb/rgba
+  if (backgroundColor.startsWith('rgb')) {
+    const rgbValues = backgroundColor.match(/\d+/g)?.map(Number) || [0, 0, 0];
+    const [r, g, b] = rgbValues;
+    return calculateLuminance(r, g, b) > 0.45 ? '#000000' : '#FFFFFF';
+  }
+
+  // Gestisci il caso in cui il colore sia in formato esadecimale
   const hex = backgroundColor.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
+  
+  // Gestisci il caso dei colori abbreviati (es. #ABC -> #AABBCC)
+  if (hex.length === 3) {
+    const r = parseInt(hex[0] + hex[0], 16);
+    const g = parseInt(hex[1] + hex[1], 16);
+    const b = parseInt(hex[2] + hex[2], 16);
+    return calculateLuminance(r, g, b) > 0.45 ? '#000000' : '#FFFFFF';
+  }
+  
+  // Gestisci il caso standard a 6 caratteri
+  if (hex.length >= 6) {
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return calculateLuminance(r, g, b) > 0.45 ? '#000000' : '#FFFFFF';
+  }
+  
+  // Default per formati non riconosciuti
+  return '#000000';
+}
 
-  // Formula di luminanza WCAG
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  return luminance > 0.5 ? '#000000' : '#FFFFFF';
+/**
+ * Calcola la luminosità percepita di un colore (WCAG 2.0)
+ * @returns Valore tra 0 (nero) e 1 (bianco)
+ */
+function calculateLuminance(r: number, g: number, b: number): number {
+  // Converti i valori RGB in gamma corretta
+  const [rGamma, gGamma, bGamma] = [r, g, b].map(c => {
+    c /= 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  
+  // Calcola la luminosità relativa (formula WCAG 2.0)
+  return 0.2126 * rGamma + 0.7152 * gGamma + 0.0722 * bGamma;
 }
 
 /**

@@ -149,8 +149,9 @@ const ColorCard: React.FC<ColorCardProps> = ({
             </div>
           )}
           {onClick && (
-            <div className="mt-2 text-center">
-              <span className="text-xs opacity-80 italic">Click to select</span>
+            <div className="mt-2">
+              {/* Empty div to maintain spacing */}
+              <div className="h-4"></div>
             </div>
           )}
         </div>
