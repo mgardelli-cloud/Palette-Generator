@@ -113,6 +113,37 @@ export function debounce<T extends (...args: any[]) => any>(
  * Calcola il rapporto di contrasto tra due colori (WCAG 2.0)
  * @returns Un numero compreso tra 1 (stesso colore) e 21 (massimo contrasto)
  */
+/**
+ * Converte un colore esadecimale in un oggetto RGB
+ * @param hex - Colore in formato esadecimale (es. '#FF0000' o 'FF0000')
+ * @returns Oggetto con proprietà r, g, b o null se il formato non è valido
+ */
+export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  // Rimuovi il carattere # se presente
+  const hexValue = hex.replace('#', '');
+  
+  // Converti in formato a 6 caratteri se è in formato abbreviato (es. #ABC -> #AABBCC)
+  const fullHex = hexValue.length === 3 
+    ? hexValue.split('').map(c => c + c).join('')
+    : hexValue;
+  
+  // Verifica che il formato sia valido (6 caratteri esadecimali)
+  if (!/^[0-9A-Fa-f]{6}$/i.test(fullHex)) {
+    return null;
+  }
+  
+  // Converti in valori RGB
+  const r = parseInt(fullHex.substring(0, 2), 16);
+  const g = parseInt(fullHex.substring(2, 4), 16);
+  const b = parseInt(fullHex.substring(4, 6), 16);
+  
+  return { r, g, b };
+}
+
+/**
+ * Calcola il rapporto di contrasto tra due colori (WCAG 2.0)
+ * @returns Un numero compreso tra 1 (stesso colore) e 21 (massimo contrasto)
+ */
 export function getContrastRatio(color1: string, color2: string): number {
   const getLuminance = (hex: string): number => {
     // Rimuovi il carattere # se presente

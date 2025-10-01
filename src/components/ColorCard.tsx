@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import { cn, getTextColor, getContrastRatio, copyToClipboard } from '../lib/utils';
+import { cn, getTextColor, getContrastRatio, copyToClipboard, hexToRgb } from '../lib/utils';
 
 interface ColorCardProps {
   color: string;
@@ -29,6 +29,10 @@ const ColorCard: React.FC<ColorCardProps> = ({
   const textColor = getTextColor(color);
   const contrastRatio = showContrast ? getContrastRatio(color, textColor) : null;
   const contrastScore = contrastRatio ? Math.round(contrastRatio * 10) / 10 : null;
+  
+  // Convert hex to RGB
+  const rgbColor = hexToRgb(color) || { r: 0, g: 0, b: 0 };
+  const rgbString = `RGB: ${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`;
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -38,17 +42,19 @@ const ColorCard: React.FC<ColorCardProps> = ({
     });
   };
 
-  // Calcolo stili materiale
+  // Material style calculation
   const blur = reflectiveness > 0 ? (100 - reflectiveness) / 10 : 0;
   const opacityShadow = reflectiveness / 200;
-  const shadow = reflectiveness > 0 ? `inset 0 0 ${blur}px rgba(255, 255, 255, ${opacityShadow}), inset 0 0 10px rgba(0, 0, 0, ${opacityShadow / 2})` : 'none';
+  const shadow = reflectiveness > 0 
+    ? `inset 0 0 ${blur}px rgba(255, 255, 255, ${opacityShadow}), inset 0 0 10px rgba(0, 0, 0, ${opacityShadow / 2})` 
+    : 'none';
 
   return (
     <motion.div
       className={cn(
         'relative group rounded-xl overflow-hidden shadow-lg transition-all duration-200',
-        'hover:shadow-xl hover:-translate-y-1',
-        'dark:shadow-gray-900/30',
+        'hover:shadow-xl hover:-translate-y-1 flex flex-col',
+        'dark:shadow-gray-900/30 h-full',
         className
       )}
       style={{
@@ -64,73 +70,90 @@ const ColorCard: React.FC<ColorCardProps> = ({
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      {/* Sfondo per simulare l'ambiente per l'opacità */}
+      {/* Background for opacity simulation */}
       {opacity < 100 && (
-        <div className="absolute inset-0 z-0 opacity-20"
-             style={{
-                backgroundImage: 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjEiPjxyZWN0IHdpZHRoPSI5IiBoZWlnaHQ9IjkiLz48cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiLz48L2c+PC9zdmc+")',
-                backgroundSize: '20px 20px'
-             }}
-        ></div>
+        <div 
+          className="absolute inset-0 z-0 opacity-20"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjxyZWN0IHdpZHRoPSI5IiBoZWlnaHQ9IjkiLz48cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiLz48L2c+PC9zdmc+")',
+            backgroundSize: '20px 20px'
+          }}
+        />
       )}
 
-      <div className="p-4 h-32 sm:h-40 flex flex-col justify-between relative z-10">
-        <div className="flex justify-between items-start">
-          <div>
+      <div className="p-4 flex flex-col h-full relative z-10">
+        <div className="flex justify-between items-start mb-2">
+          <div className="space-y-1">
             {name && (
-              <h3 className="font-semibold text-sm sm:text-base truncate max-w-[80%]">
+              <h3 className="font-semibold text-sm sm:text-base break-words max-w-[80%]">
                 {name}
               </h3>
             )}
-            {showHex && (
-              <p className="text-xs sm:text-sm opacity-90 mt-1 font-mono">
-                {color.toUpperCase()}
+            <div className="space-y-0.5">
+              {showHex && (
+                <p className="text-xs sm:text-sm opacity-90 font-mono">
+                  {color.toUpperCase()}
+                </p>
+              )}
+              <p className="text-xs sm:text-sm opacity-90 font-mono">
+                {rgbString}
               </p>
-            )}
+            </div>
           </div>
 
           <button
             onClick={handleCopy}
             className={cn(
-              'p-1.5 rounded-md transition-colors',
+              'p-1.5 rounded-md transition-colors flex-shrink-0',
               'hover:bg-black/10 dark:hover:bg-white/20',
-              'focus:outline-none focus:ring-2 focus:ring-current'
+              'focus:outline-none focus:ring-2 focus:ring-current',
+              'self-start mt-1'
             )}
             aria-label="Copy color to clipboard"
           >
-            {copied ? (
-              <CheckIcon className="w-4 h-4" />
-            ) : (
-              <ClipboardDocumentIcon className="w-4 h-4" />
-            )}
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={copied ? 'copied' : 'copy'}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.1 }}
+                className="block"
+              >
+                {copied ? (
+                  <CheckIcon className="h-4 w-4" />
+                ) : (
+                  <ClipboardDocumentIcon className="h-4 w-4" />
+                )}
+              </motion.span>
+            </AnimatePresence>
           </button>
         </div>
 
-        {showContrast && contrastScore && (
-          <div className="mt-auto">
-            <div className="flex items-center justify-between text-xs">
-              <span className="opacity-80">Contrast</span>
-              <span className="font-mono">{contrastScore}:1</span>
+        <div className="mt-auto pt-3">
+          {contrastScore !== null && (
+            <div className="text-xs opacity-80">
+              <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-current"
+                  style={{ 
+                    width: `${Math.min(100, contrastScore * 10)}%`,
+                    backgroundColor: textColor 
+                  }}
+                />
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span>Contrast</span>
+                <span className="font-mono">{contrastScore}:1</span>
+              </div>
             </div>
-            <div className="h-1.5 bg-black/10 dark:bg-white/10 rounded-full mt-1 overflow-hidden">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${Math.min(contrastScore * 10, 100)}%`,
-                  backgroundColor: textColor,
-                  opacity: 0.7
-                }}
-              />
+          )}
+          {onClick && (
+            <div className="mt-2 text-center">
+              <span className="text-xs opacity-80 italic">Click to select</span>
             </div>
-            <div className="text-[10px] mt-1 flex justify-between">
-              <span>1</span>
-              <span>3</span>
-              <span>4.5</span>
-              <span>7</span>
-              <span>21</span>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <AnimatePresence>

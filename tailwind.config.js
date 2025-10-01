@@ -7,6 +7,15 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      animation: {
+        'rainbow-shift': 'rainbow 4s linear infinite',
+      },
+      keyframes: {
+        rainbow: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '200% 50%' },
+        },
+      },
       colors: {
         primary: {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',

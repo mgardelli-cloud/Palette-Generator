@@ -74,9 +74,17 @@ const ModernColorPalette = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Color Palette Generator
-              </h1>
+              <div className="relative inline-block group">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white relative z-10 transition-all duration-300 group-hover:tracking-wider">
+                  Palette Generator
+                </h1>
+                <div className="absolute -bottom-1 left-0 right-0 h-0.5 overflow-hidden">
+                  <div className="relative h-full w-full">
+                    <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-[length:200%_100%] animate-rainbow-shift" />
+                    <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-pink-500 via-amber-500 to-blue-500 bg-[length:200%_100%] animate-rainbow-shift opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ animationDelay: '0.2s' }} />
+                  </div>
+                </div>
+              </div>
             </motion.div>
             
             <div className="flex items-center space-x-4">
