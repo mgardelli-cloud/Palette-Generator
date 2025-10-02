@@ -426,16 +426,41 @@ const ModernColorPalette = () => {
                     
                     {/* Color info */}
                     <div className="relative z-10 w-full">
-                      <div className="flex justify-between items-baseline mb-2">
-                        <motion.div 
-                          className="text-lg font-bold tracking-tight"
-                          style={{ color: textColor }}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 + (index * 0.05) }}
-                        >
-                          {color.toUpperCase()}
-                        </motion.div>
+                      <div className="flex justify-between items-center mb-3">
+                        <div>
+                          <motion.div 
+                            className="text-lg font-bold tracking-tight"
+                            style={{ color: textColor }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 + (index * 0.05) }}
+                          >
+                            {color.toUpperCase()}
+                          </motion.div>
+                          
+                          {/* Color format chips */}
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1 text-xs">
+                              <span className="opacity-70" style={{ color: textColor }}>RGB:</span>
+                              <span className="font-mono" style={{ color: textColor }}>
+                                {formatColor(color, 'rgb').replace('rgb(', '').replace(')', '')}
+                              </span>
+                            </div>
+                            <div className="w-px h-3 bg-gray-400/30"></div>
+                            <div className="flex items-center gap-1 text-xs">
+                              <span className="opacity-70" style={{ color: textColor }}>HSL:</span>
+                              <span className="font-mono" style={{ color: textColor }}>
+                                {formatColor(color, 'hsl')
+                                  .replace('hsl(', '')
+                                  .replace(')', '')
+                                  .split(',')
+                                  .map((v, i) => i === 0 ? `${v.trim()}°` : v.trim())
+                                  .join(', ')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
                         <motion.span 
                           className="text-xs font-medium px-2 py-1 rounded-full"
                           style={{ 
@@ -450,74 +475,41 @@ const ModernColorPalette = () => {
                         </motion.span>
                       </div>
                       
-                      <div className="space-y-2 mt-3">
-                        {/* RGB Section */}
-                        <div className="bg-black/5 dark:bg-white/10 p-2 rounded-lg">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-medium opacity-90" style={{ color: textColor }}>RGB</span>
-                            <button 
-                              onClick={(e) => handleCopy(formatColor(color, 'rgb'), e)}
-                              className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
-                              title="Copy RGB"
-                            >
-                              <ClipboardDocumentIcon className="h-3 w-3" style={{ color: textColor }} />
-                            </button>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {formatColor(color, 'rgb')
-                              .replace('rgb(', '')
-                              .replace(')', '')
-                              .split(',')
-                              .map((value, i) => (
-                                <span 
-                                  key={i}
-                                  className="text-xs font-mono px-2 py-0.5 rounded"
-                                  style={{
-                                    backgroundColor: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)',
-                                    color: textColor
-                                  }}
-                                >
-                                  {value.trim()}
-                                </span>
-                              ))}
-                          </div>
-                        </div>
-
-                        {/* HSL Section */}
-                        <div className="bg-black/5 dark:bg-white/10 p-2 rounded-lg">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-medium opacity-90" style={{ color: textColor }}>HSL</span>
-                            <button 
-                              onClick={(e) => handleCopy(formatColor(color, 'hsl'), e)}
-                              className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
-                              title="Copy HSL"
-                            >
-                              <ClipboardDocumentIcon className="h-3 w-3" style={{ color: textColor }} />
-                            </button>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {formatColor(color, 'hsl')
-                              .replace('hsl(', '')
-                              .replace(')', '')
-                              .split(',')
-                              .map((value, i) => {
-                                // Add degree symbol for hue (first value)
-                                const displayValue = i === 0 ? `${value.trim()}°` : value.trim();
-                                return (
-                                  <span 
-                                    key={i}
-                                    className="text-xs font-mono px-2 py-0.5 rounded"
-                                    style={{
-                                      backgroundColor: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)',
-                                      color: textColor
-                                    }}
-                                  >
-                                    {displayValue}
-                                  </span>
-                                );
-                              })}
-                          </div>
-                        </div>
+                      {/* Copy buttons */}
+                      <div className="flex gap-2 mt-2">
+                        <button 
+                          onClick={(e) => handleCopy(color, e)}
+                          className="text-xs px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                          style={{
+                            backgroundColor: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)',
+                            color: textColor
+                          }}
+                        >
+                          <ClipboardDocumentIcon className="h-3 w-3" />
+                          <span>Copy HEX</span>
+                        </button>
+                        <button 
+                          onClick={(e) => handleCopy(formatColor(color, 'rgb'), e)}
+                          className="text-xs px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                          style={{
+                            backgroundColor: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)',
+                            color: textColor
+                          }}
+                        >
+                          <ClipboardDocumentIcon className="h-3 w-3" />
+                          <span>Copy RGB</span>
+                        </button>
+                        <button 
+                          onClick={(e) => handleCopy(formatColor(color, 'hsl'), e)}
+                          className="text-xs px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                          style={{
+                            backgroundColor: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)',
+                            color: textColor
+                          }}
+                        >
+                          <ClipboardDocumentIcon className="h-3 w-3" />
+                          <span>Copy HSL</span>
+                        </button>
                       </div>
                     </div>
                   </div>
