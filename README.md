@@ -1,6 +1,6 @@
 # 🎨 Colorful - Modern Palette Generator
 
-A sleek, responsive color palette generator built with React, TypeScript, and Tailwind CSS. Create beautiful color schemes with ease and preview them in real-time.
+A sleek, responsive color palette generator built with React, TypeScript, and Tailwind CSS. Create color schemes with ease and preview them in real-time.
 
 ## ✨ Features
 
@@ -32,19 +32,4 @@ A sleek, responsive color palette generator built with React, TypeScript, and Ta
    ```
 4. Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Made by Gardo
