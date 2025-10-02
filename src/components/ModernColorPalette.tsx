@@ -12,7 +12,6 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { HexColorPicker } from 'react-colorful';
-import { cn } from '../lib/utils';
 import { getContrastText } from '../utils/colorUtils';
 
 const ModernColorPalette = () => {
