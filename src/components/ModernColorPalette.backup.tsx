@@ -31,7 +31,7 @@ const ModernColorPalette = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0); // Default to first color
   const [isAnimating] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
@@ -127,10 +127,21 @@ const ModernColorPalette = () => {
       scale: [0.98, 1],
       transition: { 
         duration: 0.6,
-        ease: [0.16, 1, 0.3, 1]
+        ease: [0.16, 1, 0.3, 1] // Custom easing for smoother animation
       }
     });
   }, [currentPalette.colors, controls]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleCopy = (color: string, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -145,82 +156,36 @@ const ModernColorPalette = () => {
     setIsMenuOpen(false);
   };
 
-  const formatColor = (color: string, format: 'hex' | 'rgb' | 'hsl'): string => {
-    // Convert hex to RGB
-    const hexToRgb = (hex: string) => {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-      return { r, g, b };
-    };
-
-    // Convert RGB to HSL
-    const rgbToHsl = (r: number, g: number, b: number) => {
-      r /= 255;
-      g /= 255;
-      b /= 255;
-      
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      let h = 0;
-      let s = 0;
-      const l = (max + min) / 2;
-
-      if (max !== min) {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        
-        switch (max) {
-          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-          case g: h = (b - r) / d + 2; break;
-          case b: h = (r - g) / d + 4; break;
-        }
-        
-        h = Math.round(h * 60);
-        if (h < 0) h += 360;
-      }
-      
-      s = Math.round(s * 100);
-      const lPercent = Math.round(l * 100);
-      
-      return { h, s, l: lPercent };
-    };
-
-    try {
-      if (color.startsWith('#')) {
-        if (format === 'hex') return color.toUpperCase();
-        
-        const { r, g, b } = hexToRgb(color);
-        if (format === 'rgb') return `rgb(${r}, ${g}, ${b})`;
-        
-        const { h, s, l } = rgbToHsl(r, g, b);
-        return `hsl(${h}, ${s}%, ${l}%)`;
-      }
-      
-      return color;
-    } catch (e) {
-      return color;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white dark:bg-black transition-colors duration-200">
       {/* Header */}
-      <motion.header 
         className="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 z-40"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="relative inline-block group">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white relative z-10 transition-all duration-300 group-hover:tracking-wider">
+        {/* ... header content ... */}
+      </motion.header>
+
+      {/* Main content */}
+      <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* ... main content ... */}
+      </main>
+
+      {/* Footer */}
+      <motion.footer 
+        className="fixed bottom-0 left-0 right-0 py-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ 
+          opacity: 1, 
+          y: 0,
+          transition: { delay: 0.5, duration: 0.8, ease: 'easeInOut' }
+        }}
+      >
+        {/* ... footer content ... */}
+      </motion.footer>
+    </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white relative z-10 transition-all duration-300 group-hover:tracking-wider">
                   Palette Generator
                 </h1>
                 <div className="absolute -bottom-1 left-0 right-0 h-0.5 overflow-hidden">
@@ -233,13 +198,60 @@ const ModernColorPalette = () => {
             </motion.div>
             
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
+              <motion.div className="relative" ref={menuRef}>
+                <motion.button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <SwatchIcon className="h-5 w-5" />
+                  <span>{schemeLabels[colorScheme as keyof typeof schemeLabels] || colorScheme}</span>
+                </motion.button>
+                
+                <AnimatePresence>
+                  {isMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
+                      className="absolute right-0 mt-2 w-48 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+                    >
+                      <div className="py-1">
+                        {schemeList.map((scheme) => (
+                          <button
+                            key={scheme}
+                            onClick={() => handleSchemeChange(scheme)}
+                            className={`w-full text-left px-4 py-2 text-sm ${
+                              colorScheme === scheme
+                                ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                                : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {schemeLabels[scheme as keyof typeof schemeLabels] || scheme}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+              
+              <motion.button
+                onClick={generateNewPalette}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors"
+              >
+                <ArrowPathIcon className="h-4 w-4" />
+                <span>Generate</span>
+              </motion.button>
               <motion.button
                 onClick={toggleDarkMode}
-                className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="p-2 rounded-full text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {darkMode ? (
                   <SunIcon className="h-5 w-5" />
@@ -247,91 +259,95 @@ const ModernColorPalette = () => {
                   <MoonIcon className="h-5 w-5" />
                 )}
               </motion.button>
-              
-              {/* Color Scheme Selector */}
-              <div className="relative" ref={menuRef}>
-                <motion.button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center space-x-1"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span>{schemeLabels[colorScheme as keyof typeof schemeLabels] || 'Color Scheme'}</span>
-                  <motion.span
-                    animate={{ rotate: isMenuOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </motion.span>
-                </motion.button>
-                
-                <AnimatePresence>
-                  {isMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                      className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
-                    >
-                      {schemeList.map((scheme) => (
-                        <button
-                          key={scheme}
-                          onClick={() => handleSchemeChange(scheme)}
-                          className={`w-full text-left px-4 py-2 text-sm ${
-                            scheme === colorScheme
-                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                          } transition-colors`}
-                        >
-                          {schemeLabels[scheme as keyof typeof schemeLabels] || scheme}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              
-              {/* Generate New Palette */}
-              <motion.button
-                onClick={generateNewPalette}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all flex items-center space-x-1"
-                whileHover={{ scale: 1.02, boxShadow: '0 4px 12px -2px rgba(99, 102, 241, 0.5)' }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <SparklesIcon className="h-4 w-4" />
-                <span>Generate</span>
-              </motion.button>
             </div>
           </div>
         </div>
       </motion.header>
 
-      {/* Main content */}
-      <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Main Content */}
+      <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
           <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+            key={JSON.stringify(currentPalette.colors)}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+            initial="hidden"
+            animate={controls}
             variants={{
               hidden: { opacity: 0 },
-              show: {
+              visible: {
                 opacity: 1,
                 transition: {
                   staggerChildren: 0.1,
-                  delayChildren: 0.2
+                  delayChildren: 0.1
                 }
               }
             }}
-            initial="hidden"
-            animate="show"
-            exit="hidden"
           >
             {currentPalette.colors.map((color, index) => {
-              const isLight = getContrastText(color) === '#000';
-              const textColor = isLight ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)';
+              const textColor = getContrastText(color);
+              const isLight = textColor === '#000000';
               
+              // Format color to different formats
+              const formatColor = (color: string, format: 'hex' | 'rgb' | 'hsl' = 'hex') => {
+                if (!color) return '';
+                
+                // Convert hex to RGB
+                const hexToRgb = (hex: string) => {
+                  const r = parseInt(hex.slice(1, 3), 16);
+                  const g = parseInt(hex.slice(3, 5), 16);
+                  const b = parseInt(hex.slice(5, 7), 16);
+                  return { r, g, b };
+                };
+                
+                // Convert RGB to HSL
+                const rgbToHsl = (r: number, g: number, b: number) => {
+                  r /= 255;
+                  g /= 255;
+                  b /= 255;
+                  
+                  const max = Math.max(r, g, b);
+                  const min = Math.min(r, g, b);
+                  let h = 0, s, l = (max + min) / 2;
+                  
+                  if (max === min) {
+                    h = s = 0; // achromatic
+                  } else {
+                    const d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    
+                    switch (max) {
+                      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                      case g: h = (b - r) / d + 2; break;
+                      case b: h = (r - g) / d + 4; break;
+                    }
+                    
+                    h = Math.round(h * 60);
+                    if (h < 0) h += 360;
+                  }
+                  
+                  s = Math.round(s * 100);
+                  l = Math.round(l * 100);
+                  
+                  return { h, s, l };
+                };
+                
+                try {
+                  if (color.startsWith('#')) {
+                    if (format === 'hex') return color.toUpperCase();
+                    
+                    const { r, g, b } = hexToRgb(color);
+                    if (format === 'rgb') return `rgb(${r}, ${g}, ${b})`;
+                    
+                    const { h, s, l } = rgbToHsl(r, g, b);
+                    return `hsl(${h}, ${s}%, ${l}%)`;
+                  }
+                  
+                  return color;
+                } catch (e) {
+                  return color;
+                }
+              };
+
               return (
                 <motion.div
                   key={`${color}-${index}`}
@@ -366,6 +382,7 @@ const ModernColorPalette = () => {
                     boxShadow: `0 15px 35px -5px ${color}30, 0 10px 15px -10px ${color}20`,
                   }}
                 >
+                  {/* Color Display */}
                   <div 
                     className="h-48 flex items-end p-6 relative overflow-hidden"
                     style={{ backgroundColor: color }}
@@ -384,9 +401,13 @@ const ModernColorPalette = () => {
                           setSelectedColorIndex(index);
                           setIsColorPickerOpen(true);
                         }}
-                        className={`p-2 rounded-full backdrop-blur-sm ${
-                          isLight ? 'bg-black/10 hover:bg-black/20 text-gray-900' : 'bg-white/20 hover:bg-white/30 text-white'
-                        } transition-colors`}
+                        className={cn(
+                          "p-2 rounded-full backdrop-blur-sm transition-all",
+                          isLight 
+                            ? 'bg-black/10 hover:bg-black/20 text-gray-900' 
+                            : 'bg-white/20 hover:bg-white/30 text-white',
+                          "shadow-lg"
+                        )}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         title="Edit color"
@@ -397,9 +418,14 @@ const ModernColorPalette = () => {
                       {/* Copy button */}
                       <motion.button
                         onClick={(e) => handleCopy(color, e)}
-                        className={`p-2 rounded-full backdrop-blur-sm ${
-                          isLight ? 'bg-black/10 hover:bg-black/20 text-gray-900' : 'bg-white/20 hover:bg-white/30 text-white'
-                        } transition-colors relative overflow-hidden ${copied === color ? 'scale-100' : 'scale-90 group-hover:scale-100'}`}
+                        className={cn(
+                          "p-2 rounded-full backdrop-blur-sm transition-all relative overflow-hidden",
+                          isLight 
+                            ? 'bg-black/10 hover:bg-black/20 text-gray-900' 
+                            : 'bg-white/20 hover:bg-white/30 text-white',
+                          copied === color ? 'scale-100' : 'scale-90 group-hover:scale-100',
+                          "shadow-lg"
+                        )}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         initial={false}
@@ -430,7 +456,7 @@ const ModernColorPalette = () => {
                       <div className="flex justify-between items-baseline mb-2">
                         <motion.div 
                           className="text-lg font-bold tracking-tight"
-                          style={{ color: textColor }}
+                          style={{ color: isLight ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)' }}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 + (index * 0.05) }}
@@ -441,7 +467,7 @@ const ModernColorPalette = () => {
                           className="text-xs font-medium px-2 py-1 rounded-full"
                           style={{ 
                             backgroundColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)',
-                            color: textColor
+                            color: isLight ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.9)'
                           }}
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -454,13 +480,13 @@ const ModernColorPalette = () => {
                       <div className="space-y-1.5">
                         <div className="flex justify-between items-center">
                           <span className="text-xs opacity-80" style={{ color: isLight ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)' }}>RGB</span>
-                          <span className="text-xs font-mono font-medium" style={{ color: textColor }}>
+                          <span className="text-xs font-mono font-medium" style={{ color: isLight ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)' }}>
                             {formatColor(color, 'rgb').replace('rgb(', '').replace(')', '')}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-xs opacity-80" style={{ color: isLight ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)' }}>HSL</span>
-                          <span className="text-xs font-mono font-medium" style={{ color: textColor }}>
+                          <span className="text-xs font-mono font-medium" style={{ color: isLight ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)' }}>
                             {formatColor(color, 'hsl').replace('hsl(', '').replace(')', '')}
                           </span>
                         </div>
@@ -487,8 +513,7 @@ const ModernColorPalette = () => {
                   </div>
                   
                   {/* Glass overlay effect */}
-                  <div 
-                    className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
                       background: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%)',
                     }}
@@ -522,101 +547,134 @@ const ModernColorPalette = () => {
                     rotate: [0, 360],
                   }}
                   transition={{
-                    rotate: {
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: 'linear'
-                    }
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: 'linear',
                   }}
                 >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <SwatchIcon className="h-4 w-4" />
                 </motion.div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">Palette Generator</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Create beautiful color palettes</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {currentPalette.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {schemeLabels[colorScheme as keyof typeof schemeLabels] || colorScheme}
+                  </p>
                 </div>
               </div>
+              
               <div className="flex items-center gap-2">
                 <motion.button
                   onClick={generateNewPalette}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all flex items-center space-x-1"
-                  whileHover={{ scale: 1.02, boxShadow: '0 4px 12px -2px rgba(99, 102, 241, 0.5)' }}
+                  className={cn(
+                    "px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium",
+                    "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+                    "shadow-lg hover:shadow-xl transition-all duration-300",
+                    "hover:scale-[1.02] active:scale-95"
+                  )}
+                  whileHover={{ 
+                    y: -2,
+                    boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.3)'
+                  }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <ArrowPathIcon className="h-4 w-4" />
+                  <SparklesIcon className="h-4 w-4" />
                   <span>Generate New</span>
                 </motion.button>
+                
+                <motion.button
+                  onClick={toggleDarkMode}
+                  className={cn(
+                    "p-2 rounded-full flex items-center justify-center",
+                    "bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-200",
+                    "shadow-lg hover:shadow-xl transition-all duration-300",
+                    "hover:scale-105 active:scale-95"
+                  )}
+                  whileHover={{ rotate: 15 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {darkMode ? (
+                    <SunIcon className="h-5 w-5" />
+                  ) : (
+                    <MoonIcon className="h-5 w-5" />
+                  )}
+                </motion.button>
               </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                Made with ❤️ by Gardo | {new Date().getFullYear()}
+              </p>
             </div>
           </div>
         </div>
       </motion.footer>
-
-      {/* Color picker modal */}
-      <AnimatePresence>
-        {isColorPickerOpen && selectedColorIndex !== null && (
-          <div 
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setIsColorPickerOpen(false)}
-          >
-            <motion.div 
-              className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800"
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              ref={colorPickerRef}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Color</h3>
-                <button 
-                  onClick={() => setIsColorPickerOpen(false)}
-                  className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400"
-                  aria-label="Close"
-                >
-                  <XMarkIcon className="h-6 w-6" />
-                </button>
-              </div>
-              <div className="mb-4">
-                <HexColorPicker 
-                  color={currentPalette.colors[selectedColorIndex]} 
-                  onChange={(newColor) => {
-                    const updatedColors = [...currentPalette.colors];
-                    updatedColors[selectedColorIndex] = newColor;
-                    // In a real app, you would update the state with the new color
-                    console.log('Color updated to:', newColor);
-                  }} 
-                  className="w-full h-64 rounded-xl overflow-hidden"
-                />
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setIsColorPickerOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    // Here you would update the color in your state
-                    console.log('Color applied:', currentPalette.colors[selectedColorIndex]);
-                    setIsColorPickerOpen(false);
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
-                  style={{ backgroundColor: currentPalette.colors[selectedColorIndex] }}
-                >
-                  Apply
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
+    
+    {/* Color picker modal */}
+    <AnimatePresence>
+      {isColorPickerOpen && selectedColorIndex !== null && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setIsColorPickerOpen(false)}
+        >
+          <motion.div 
+            className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            ref={colorPickerRef}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Color</h3>
+              <button 
+                onClick={() => setIsColorPickerOpen(false)}
+                className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400"
+                aria-label="Close"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="mb-4">
+              <HexColorPicker 
+                color={currentPalette.colors[selectedColorIndex]} 
+                onChange={(newColor) => {
+                  const updatedColors = [...currentPalette.colors];
+                  updatedColors[selectedColorIndex] = newColor;
+                  // In a real app, you would update the state with the new color
+                  console.log('Color updated to:', newColor);
+                }} 
+                className="w-full h-64 rounded-xl overflow-hidden"
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsColorPickerOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Here you would update the color in your state
+                  console.log('Color applied:', currentPalette.colors[selectedColorIndex]);
+                  setIsColorPickerOpen(false);
+                }}
+                className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+                style={{ backgroundColor: currentPalette.colors[selectedColorIndex] }}
+              >
+                Apply
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 
