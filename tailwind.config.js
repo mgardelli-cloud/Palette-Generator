@@ -6,6 +6,9 @@ module.exports = {
   ],
   darkMode: 'class',
   theme: {
+    fontFamily: {
+      sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+    },
     extend: {
       animation: {
         'rainbow-shift': 'rainbow 4s linear infinite',
