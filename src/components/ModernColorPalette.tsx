@@ -30,7 +30,6 @@ const ModernColorPalette = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAnimating] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   
   // Auto-animate colors
   useEffect(() => {
