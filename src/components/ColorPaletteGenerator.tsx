@@ -8,8 +8,7 @@ import {
   generateMonochromatic,
   generateComplementary,
   generateSplitComplementary,
-  generateTetradic,
-  hexToRgb
+  generateTetradic
 } from '../utils/colorUtils';
 import {
   ArrowPathIcon,
