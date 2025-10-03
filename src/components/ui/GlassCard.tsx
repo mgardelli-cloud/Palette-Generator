@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
 interface GlassCardProps {
@@ -8,12 +8,12 @@ interface GlassCardProps {
   delay?: number;
 }
 
-export const GlassCard: React.FC<GlassCardProps> = ({ 
+export const GlassCard = ({ 
   children, 
   className = '', 
   hoverEffect = true,
   delay = 0 
-}) => {
+}: GlassCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

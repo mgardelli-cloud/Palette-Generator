@@ -1,8 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { useTheme } from '../contexts/ThemeContext';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/Button';
-import { GlassCard } from './ui/GlassCard';
 import {
   getContrastText,
   generateAnalogous,
@@ -11,9 +9,7 @@ import {
   generateComplementary,
   generateSplitComplementary,
   generateTetradic,
-  hexToRgb,
-  hexToHsl,
-  hslToHex
+  hexToRgb
 } from '../utils/colorUtils';
 import {
   ArrowPathIcon,
@@ -22,54 +18,42 @@ import {
   TrashIcon,
   CheckIcon,
   ArrowDownTrayIcon,
-  DocumentArrowUpIcon,
-  ArrowsPointingOutIcon,
-  ArrowsPointingInIcon,
-  ClipboardDocumentIcon,
-  SunIcon,
-  MoonIcon
+  DocumentArrowUpIcon
 } from '@heroicons/react/24/outline';
 import ColorCard from './ColorCard';
 import type { ColorPalette } from '../types';
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
+// Animation variants (kept for future use)
+// const containerVariants = {
+//   hidden: { opacity: 0 },
+//   visible: {
+//     opacity: 1,
+//     transition: {
+//       staggerChildren: 0.1,
+//       delayChildren: 0.2,
+//     },
+//   },
+// };
 
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 100,
-      damping: 15,
-    },
-  },
-  hover: {
-    scale: 1.03,
-    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-// Utility function to get color brightness
-const getBrightness = (hex: string) => {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return 0;
-  return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
-};
+// const itemVariants = {
+//   hidden: { y: 20, opacity: 0 },
+//   visible: {
+//     y: 0,
+//     opacity: 1,
+//     transition: {
+//       type: 'spring',
+//       stiffness: 100,
+//       damping: 15,
+//     },
+//   },
+//   hover: {
+//     scale: 1.03,
+//     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+//     transition: {
+//       duration: 0.2,
+//     },
+//   },
+// };
 
 // Definizione dei tipi di schema colore
 type ColorSchemeType = 'Analogous' | 'Complementary' | 'Triadic' | 'Monochromatic' | 'SplitComplementary' | 'Tetradic' | 'MonochromaticAchromatic' | 'LuminosityContrast';
@@ -103,18 +87,8 @@ interface Color {
 }
 
 const ColorPaletteGenerator: React.FC = () => {
-  const {
-    darkMode,
-    toggleDarkMode,
-    currentPalette: themePalette,
-    generateNewPalette,
-    palettes,
-    savePalette,
-    deletePalette,
-  } = useTheme();
-
-  // Stato per la palette corrente con funzionalità avanzate
-  const [currentPalette, setCurrentPalette] = useState<ColorPalette>(themePalette || {
+  // State for the current palette with advanced features
+  const [currentPalette, setCurrentPalette] = useState<ColorPalette>({
     name: 'My Color Palette',
     colors: ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B', '#10B981'],
     primary: '#4F46E5',
@@ -123,6 +97,40 @@ const ColorPaletteGenerator: React.FC = () => {
     background: '#ffffff',
     text: '#111827'
   });
+
+  // State for saved palettes
+  const [palettes, setPalettes] = useState<ColorPalette[]>([]);
+  
+  // Function to save a palette
+  const savePalette = (palette: ColorPalette) => {
+    setPalettes([...palettes, palette]);
+  };
+  
+  // Function to delete a palette
+  const deletePalette = (name: string) => {
+    setPalettes(palettes.filter(p => p.name !== name));
+  };
+  
+  // Function to generate a new palette
+  const generateNewPalette = (): ColorPalette => {
+    const colors = [
+      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+    ];
+    
+    return {
+      name: `Palette ${palettes.length + 1}`,
+      colors,
+      primary: colors[0],
+      secondary: colors[1],
+      accent: colors[2],
+      background: '#ffffff',
+      text: '#111827'
+    };
+  };
 
   // Stato per le funzionalità avanzate
   const [baseColor, setBaseColor] = useState<string>('#4F46E5');
