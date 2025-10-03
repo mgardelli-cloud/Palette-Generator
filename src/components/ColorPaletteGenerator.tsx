@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/Button';
+import { GlassCard } from './ui/GlassCard';
 import {
   getContrastText,
   generateAnalogous,
@@ -10,10 +11,11 @@ import {
   generateComplementary,
   generateSplitComplementary,
   generateTetradic,
+  hexToRgb,
+  hexToHsl,
+  hslToHex
 } from '../utils/colorUtils';
 import {
-  SunIcon,
-  MoonIcon,
   ArrowPathIcon,
   SwatchIcon,
   PlusIcon,
@@ -21,9 +23,53 @@ import {
   CheckIcon,
   ArrowDownTrayIcon,
   DocumentArrowUpIcon,
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon,
+  ClipboardDocumentIcon,
+  SunIcon,
+  MoonIcon
 } from '@heroicons/react/24/outline';
 import ColorCard from './ColorCard';
 import type { ColorPalette } from '../types';
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+      damping: 15,
+    },
+  },
+  hover: {
+    scale: 1.03,
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    transition: {
+      duration: 0.2,
+    },
+  },
+};
+
+// Utility function to get color brightness
+const getBrightness = (hex: string) => {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 0;
+  return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+};
 
 // Definizione dei tipi di schema colore
 type ColorSchemeType = 'Analogous' | 'Complementary' | 'Triadic' | 'Monochromatic' | 'SplitComplementary' | 'Tetradic' | 'MonochromaticAchromatic' | 'LuminosityContrast';
@@ -370,30 +416,6 @@ const ColorPaletteGenerator: React.FC = () => {
 
 return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Spectra
-          </h1>
-
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleDarkMode}
-              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {darkMode ? (
-                <SunIcon className="h-5 w-5" />
-              ) : (
-                <MoonIcon className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Controlli avanzati */}
         <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-indigo-100 dark:border-indigo-900/50">
