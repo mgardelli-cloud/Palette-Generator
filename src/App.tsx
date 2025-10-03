@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoadingSpinner } from './components/ui/loading-spinner';
