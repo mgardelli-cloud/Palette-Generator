@@ -7,12 +7,7 @@ export default defineConfig({
     react({
       jsxImportSource: 'react',
       babel: {
-        plugins: [
-          ['@babel/plugin-transform-react-jsx', {
-            runtime: 'automatic',
-            importSource: 'react'
-          }]
-        ]
+        // No need for additional Babel plugins as we're using the new JSX transform
       }
     })
   ],
